@@ -13,6 +13,7 @@ const router = createRouter({
     { path: '/hire', name: 'Hire', component: Hire },
     { path: '/gallery', name: 'Gallery', component: Gallery },
     { path: '/admin', name: 'Admin', component: Admin },
+    { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/NotFound.vue') }
   ],
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {

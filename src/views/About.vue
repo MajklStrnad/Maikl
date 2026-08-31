@@ -238,15 +238,23 @@ function onDown(e) {
   baseRotation = rotation.value
   pointerId = e.pointerId
   history = [{ x: e.clientX, t: performance.now() }]
+  // Capture the pointer immediately on press (not after the drag threshold
+  // is crossed). On touch, browsers decide "this is a scroll gesture" from
+  // the very first few pixels of movement — waiting to capture meant a
+  // slightly-diagonal swipe could be claimed by native scrolling before our
+  // dx threshold ever fired, killing the drag before it started.
+  e.currentTarget.setPointerCapture?.(pointerId)
 }
 function onMove(e) {
   if (!pressing) return
   const dx = e.clientX - startX
   if (!dragging.value && Math.abs(dx) > DRAG_THRESHOLD) {
     dragging.value = true
-    e.currentTarget.setPointerCapture?.(pointerId)
   }
   if (dragging.value) {
+    // Stop the browser from fighting the drag with native scroll/refresh
+    // gestures once we've committed to handling this as a spin.
+    e.preventDefault()
     rotation.value = baseRotation + dx * degPerPx.value
     history.push({ x: e.clientX, t: performance.now() })
     if (history.length > 6) history.shift()
@@ -384,7 +392,6 @@ onBeforeUnmount(() => {
   padding-bottom: max(20px, env(safe-area-inset-bottom));
   padding-left: max(20px, env(safe-area-inset-left));
   padding-right: max(20px, env(safe-area-inset-right));
-  /* CHANGED: warmer dark so gaps between cards don't read as "black holes" */
   background-color: var(--bg-color, #111);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-sizing: border-box;
@@ -408,7 +415,6 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   transition: margin-top 0.2s ease;
-  /* CHANGED: removed overflow: hidden so shadows / glows aren't clipped */
 }
 
 /* ── perspective container + rotor ──────────────────────── */
@@ -417,7 +423,12 @@ onBeforeUnmount(() => {
   inset: 0;
   perspective: 1200px;
   perspective-origin: 50% 50%;
-  touch-action: pan-y;
+  /* CHANGED: was `pan-y`. On touch, a browser decides the gesture type
+     (scroll vs. custom) from the very first few pixels of movement — any
+     slightly-diagonal swipe could get claimed as a vertical pan before our
+     drag threshold fired, which fully broke touch-dragging. `none` hands
+     all gesture handling to the pointer listeners below. */
+  touch-action: none;
   cursor: grab;
   padding: 20px;
 }
@@ -448,17 +459,16 @@ onBeforeUnmount(() => {
   gap: clamp(10px, 3vw, 15px);
   overflow-y: auto;
   overflow-x: hidden;
-  /* CHANGED: padding & border now count inside the width/height so the
-     card never grows taller than the stage and gets clipped */
   box-sizing: border-box;
-  /* CHANGED: hide scrollbars on every screen size */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  touch-action: none; /* ← added: without this, touches on the card itself
+                           are claimed by native scroll before pointermove
+                           ever fires, same root cause as the .scene fix */
   background: linear-gradient(145deg, #161616, #0d0d0d);
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-/* CHANGED: universal webkit scrollbar hide */
 .face::-webkit-scrollbar {
   display: none;
   width: 0;
@@ -795,9 +805,6 @@ onBeforeUnmount(() => {
 @media (max-width: 600px) {
   .arrow { width: 44px; height: 44px; font-size: 21px; }
 }
-
-/* CHANGED: removed the mobile-only scrollbar block because scrollbars
-   are now hidden on all breakpoints via the base .face rule above */
 
 @media (max-width: 380px) {
   .arrow { width: 40px; height: 40px; font-size: 18px; }
