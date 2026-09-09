@@ -33,7 +33,7 @@
                 </li>
               </ul>
             </div>
-            <a href="#" class="cta-button" @click.stop.prevent>{{ plan.cta }}</a>
+            <router-link to="/hire" class="cta-button" @click.stop>{{ plan.cta }}</router-link>
           </div>
         </div>
       </section>
