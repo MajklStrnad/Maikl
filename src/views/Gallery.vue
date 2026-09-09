@@ -12,16 +12,16 @@
       @mouseleave="fanOpen = false; hovered = null"
     >
       <component
-        :is="item.real ? 'a' : 'RouterLink'"
+        :is="linkComponent(item)"
         v-for="(item, i) in projects"
         :key="item.id"
         class="proj-card"
         :class="{ 'proj-card--open': !item.real }"
         :style="!isMobile ? cardStyle(i) : undefined"
-        :href="item.real ? item.url : undefined"
-        :to="item.real ? undefined : '/hire'"
-        :target="item.real ? '_blank' : undefined"
-        :rel="item.real ? 'noopener' : undefined"
+        :href="item.real && isStaticLink(item) ? item.url : undefined"
+        :to="item.real && !isStaticLink(item) ? item.url : (!item.real ? '/hire' : undefined)"
+        :target="item.real && isStaticLink(item) ? '_blank' : undefined"
+        :rel="item.real && isStaticLink(item) ? 'noopener' : undefined"
         tabindex="0"
         role="button"
         :aria-label="item.real ? `${item.title} — ${item.category}` : 'Open project slot — get in touch'"
@@ -32,7 +32,7 @@
         <div class="proj-thumb">
           <template v-if="item.real">
             <img class="proj-photo" :src="item.image" :alt="`${item.title} preview`" />
-            <span class="proj-external" aria-hidden="true">↗</span>
+            <span v-if="isStaticLink(item)" class="proj-external" aria-hidden="true">↗</span>
           </template>
 
           <template v-else>
@@ -73,11 +73,19 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import massageAcademyThumb from '@/assets/massage-academy-thumb.png'
 import lashesThumb from '@/assets/lashes-thumb.png'
 import zeroHourThumb from '@/assets/0hour-thumb.png'
+import galaxyThumb from '@/assets/galaxy-thumb.png'
 import sakuraBranch from '@/assets/sakura-branch.png'
 
 // Only real, shipped projects get `real: true` + full details. Everything
 // else renders as an open "want to be next?" slot — swap these in as you
 // ship more work.
+//
+// `url` can be either:
+//   - a static file link: a full external URL, or an in-repo .html file
+//     served from public/ (e.g. '/lashes.html') — these render as a plain
+//     <a href> that opens in a new tab, see isStaticLink() below.
+//   - an internal Vue route path (e.g. '/galaxy') — these render via
+//     RouterLink and navigate within the app.
 const projects = [
   {
     id: 1,
@@ -104,9 +112,37 @@ const projects = [
     url: 'https://massage-academy.onrender.com/',
     image: massageAcademyThumb,
   },
-  { id: 4 },
+  {
+    id: 4,
+    real: true,
+    title: 'Galaxy',
+    category: 'Animation',
+    url: '/galaxy.html',
+    image: galaxyThumb,
+    linkLabel: 'View animation →',
+  },
   { id: 5 },
 ]
+
+// A "static" link is a plain file served as-is (an .html file in public/,
+// or a full external URL) — those need a plain <a> tag so the browser does
+// a real navigation instead of Vue Router trying (and failing) to match
+// it against a route. Anything else real (like '/galaxy') is an internal
+// Vue route and needs RouterLink.
+function isStaticLink(item) {
+  const url = item.url || ''
+  return /^https?:\/\//.test(url) || url.endsWith('.html')
+}
+
+// Which component to render the card as: real items with a static link
+// use a plain <a>; real items with a route path use RouterLink; open
+// slots use RouterLink to /hire.
+function linkComponent(item) {
+  if (item.real) {
+    return isStaticLink(item) ? 'a' : 'RouterLink'
+  }
+  return 'RouterLink'
+}
 
 // ── Fan-out deck (desktop hover) ─────────────────────────────────
 // At rest the cards sit in a tight, slightly-tilted stack (like a closed

@@ -20,7 +20,7 @@
             <!-- 01 — Bio -->
             <template v-if="c.type === 'bio'">
               <div class="label">01 / WHO</div>
-              <h3 class="card-title">Maikl Strnad</h3>
+              <h3 class="card-title">Maikl</h3>
               <p class="lead">Web developer &amp; cybersecurity student, based in Prague.</p>
               <div class="status"><i></i> Available for work</div>
             </template>
