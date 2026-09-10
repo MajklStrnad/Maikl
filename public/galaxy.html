@@ -72,9 +72,6 @@
   let DPR = 1;
   let particles = [];
   let lastScroll = 0;
-  let hoverX = 0;
-  let hoverY = 0;
-  let hoverStrength = 0;
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const choose = list => list[(Math.random() * list.length) | 0];
@@ -740,21 +737,7 @@
       let tx = target.x;
       let ty = target.y;
       let tz = target.z;
-      let interaction = 0;
-      if (!reducedMotion && target.type === 'sphere') {
-        const pointerX = hoverX - cx;
-        const pointerY = hoverY - cy;
-        const dx = tx - pointerX;
-        const dy = ty - pointerY;
-        const distance = Math.hypot(dx, dy);
-        const proximity = Math.exp(-distance / (Math.min(W, H) * 0.24));
-        interaction = proximity * hoverStrength;
-        const safeDistance = Math.max(1, distance);
-        const scatter = interaction * Math.min(W, H) * 0.085;
-        tx += (dx / safeDistance) * scatter;
-        ty += (dy / safeDistance) * scatter;
-        tz += Math.sin(target.phase + time * 2.2) * interaction * Math.min(W, H) * 0.055;
-      } else if (!reducedMotion && target.type === 'blossom') {
+      if (!reducedMotion && target.type === 'blossom') {
         tx += Math.sin(time * 0.76 + target.phase) * target.sway * 0.9;
         ty += Math.cos(time * 0.58 + target.phase) * target.sway * 0.34;
       } else if (!reducedMotion && target.type === 'branch' && target.wavePhase !== undefined) {
@@ -779,7 +762,7 @@
       const finalY = cy + pitchY * perspective;
       const currentX = mix(gx + liveX, finalX, transition);
       const currentY = mix(gy + liveY, finalY, transition);
-      const currentSize = mix(particle.size, target.size * perspective, transition) + interaction * 1.4;
+      const currentSize = mix(particle.size, target.size * perspective, transition);
       const opacity = transition < 0.18 ? 1 : 0.8 + 0.2 * Math.sin(transition * Math.PI);
 
       ctx.globalAlpha = opacity;
@@ -808,12 +791,6 @@
   }
 
   window.addEventListener('resize', resize, { passive: true });
-  canvas.addEventListener('pointermove', event => {
-    hoverX = event.clientX;
-    hoverY = event.clientY;
-    hoverStrength = 1;
-  }, { passive: true });
-  canvas.addEventListener('pointerleave', () => { hoverStrength = 0; }, { passive: true });
   resize();
   requestAnimationFrame(draw);
 })();
