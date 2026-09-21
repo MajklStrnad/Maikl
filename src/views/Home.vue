@@ -175,6 +175,13 @@ onMounted(() => {
   --accent-pink: rgba(255, 192, 203, 0.3);
   --border-color: rgba(255, 255, 255, 0.05);
 }
+
+/* registered globally so the browser can animate the angle */
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 135deg;
+}
 </style>
 
 <style scoped>
@@ -279,6 +286,48 @@ onMounted(() => {
   }
 }
 
+/* rotating gradient border, shown on hover */
+.pricing-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    var(--border-angle),
+    rgba(255, 192, 203, 0.9) 0%,
+    rgba(255, 192, 203, 0.7) 15%,
+    rgba(255, 192, 203, 0.15) 30%,
+    rgba(255, 192, 203, 0) 36%,
+    rgba(255, 192, 203, 0) 64%,
+    rgba(255, 192, 203, 0.15) 70%,
+    rgba(255, 192, 203, 0.7) 85%,
+    rgba(255, 192, 203, 0.9) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  animation: border-spin 4.6s infinite;
+  animation-play-state: paused;
+}
+
+@keyframes border-spin {
+  0% {
+    --border-angle: 135deg;
+    animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
+  }
+  50% {
+    --border-angle: 315deg;
+    animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
+  }
+  100% {
+    --border-angle: 495deg;
+  }
+}
+
 .pricing-card.visible {
   opacity: 1;
   transform: translateY(0);
@@ -286,10 +335,12 @@ onMounted(() => {
 
 @media (hover: hover) and (pointer: fine) {
   .pricing-card:hover {
-    border-color: rgba(255, 192, 203, 0.3);
     transform: translateY(-15px);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 192, 203, 0.12),
-      0 0 50px rgba(255, 192, 203, 0.08), 0 0 100px rgba(255, 192, 203, 0.04);
+  }
+
+  .pricing-card:hover::after {
+    opacity: 1;
+    animation-play-state: running;
   }
 
   .pricing-card:hover .features li {

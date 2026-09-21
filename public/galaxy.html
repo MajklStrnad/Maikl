@@ -72,6 +72,7 @@
   let DPR = 1;
   let particles = [];
   let lastScroll = 0;
+  const pointer = { lastX: 0, lastY: 0, yaw: 0, pitch: 0 };
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const choose = list => list[(Math.random() * list.length) | 0];
@@ -694,8 +695,8 @@
     const treeVisible = smoothstep(clamp((progress - 0.58) / 0.24, 0, 1));
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const galaxyRotation = reducedMotion ? 0 : -time * 0.15;
-    const treeRotation = reducedMotion ? 0 : time * 0.11;
-    const treePitch = 0;
+    const treeRotation = reducedMotion ? 0 : time * 0.11 + pointer.yaw;
+    const treePitch = reducedMotion ? 0 : pointer.pitch;
 
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = '#020108';
@@ -764,7 +765,6 @@
       const currentY = mix(gy + liveY, finalY, transition);
       const currentSize = mix(particle.size, target.size * perspective, transition);
       const opacity = transition < 0.18 ? 1 : 0.8 + 0.2 * Math.sin(transition * Math.PI);
-
       ctx.globalAlpha = opacity;
       ctx.fillStyle = transition < 0.46 ? particle.color : target.color;
       ctx.beginPath();
@@ -789,6 +789,19 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     initParticles();
   }
+
+  canvas.addEventListener('pointerenter', event => {
+    pointer.lastX = event.clientX;
+    pointer.lastY = event.clientY;
+  }, { passive: true });
+  canvas.addEventListener('pointermove', event => {
+    const movementX = event.clientX - pointer.lastX;
+    const movementY = event.clientY - pointer.lastY;
+    pointer.yaw += movementX * 0.0015;
+    pointer.pitch = clamp(pointer.pitch + movementY * 0.001, -0.7, 0.7);
+    pointer.lastX = event.clientX;
+    pointer.lastY = event.clientY;
+  }, { passive: true });
 
   window.addEventListener('resize', resize, { passive: true });
   resize();
