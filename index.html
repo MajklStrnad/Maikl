@@ -1,39 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Maikl — Web Developer & Creative Technologist</title>
-    <meta name="description" content="Motion-first websites and interactive experiences for startups and brands. Based in Czech Republic, available internationally.">
-    
+    <meta
+      name="description"
+      content="Motion-first websites and interactive experiences for startups and brands. Based in Czech Republic, available internationally."
+    />
+
     <!-- Open Graph -->
-    <meta property="og:title" content="Maikl — Web Developer">
-    <meta property="og:description" content="Building motion-first websites and interactive experiences for startups and brands.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://maikl.agency">
-    <meta property="og:image" content="https://maikl.agency/og-image.png">
-    
+    <meta property="og:title" content="Maikl — Web Developer" />
+    <meta
+      property="og:description"
+      content="Building motion-first websites and interactive experiences for startups and brands."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://maikl.agency" />
+    <meta property="og:image" content="https://maikl.agency/og-image.png" />
+
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    
+    <meta name="twitter:card" content="summary_large_image" />
+
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Hero images: preload the viewport-matched WebP so the LCP isn't blocked -->
+    <link
+      rel="preload"
+      as="image"
+      href="/blooming.webp"
+      type="image/webp"
+      media="(min-width: 769px)"
+    />
+    <link rel="preload" as="image" href="/bare.webp" type="image/webp" media="(min-width: 769px)" />
+    <link
+      rel="preload"
+      as="image"
+      href="/blooming-mobile.webp"
+      type="image/webp"
+      media="(max-width: 768px)"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/bare-mobile.webp"
+      type="image/webp"
+      media="(max-width: 768px)"
+    />
+
     <!-- Schema.org -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Maikl",
-      "url": "https://maikl.agency",
-      "jobTitle": "Web Developer",
-      "description": "Motion-first websites and interactive experiences",
-      "sameAs": [
-        "https://github.com/MajklStrnad",
-        "https://www.linkedin.com/in/michal-strnad-11aa763b9"
-      ]
-    }
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Maikl",
+        "url": "https://maikl.agency",
+        "jobTitle": "Web Developer",
+        "description": "Motion-first websites and interactive experiences",
+        "sameAs": [
+          "https://github.com/MajklStrnad",
+          "https://www.linkedin.com/in/michal-strnad-11aa763b9"
+        ]
+      }
     </script>
   </head>
   <body>

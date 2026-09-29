@@ -12,22 +12,36 @@
       }"
     >
       <div class="layer layer-bloomed">
-        <img
-          :src="isMobile ? '/blooming-mobile.png' : '/blooming.png'"
-          alt=""
-          loading="lazy"
-          fetchpriority="low"
-          decoding="async"
-        />
+        <picture>
+          <source media="(max-width: 768px)" srcset="/blooming-mobile.webp" type="image/webp" />
+          <source media="(max-width: 768px)" srcset="/blooming-mobile.png" type="image/png" />
+          <source srcset="/blooming.webp" type="image/webp" />
+          <img
+            src="/blooming.png"
+            alt=""
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width="2560"
+            height="1440"
+          />
+        </picture>
       </div>
       <div class="layer layer-bare">
-        <img
-          :src="isMobile ? '/bare-mobile.png' : '/bare.png'"
-          alt=""
-          loading="lazy"
-          fetchpriority="low"
-          decoding="async"
-        />
+        <picture>
+          <source media="(max-width: 768px)" srcset="/bare-mobile.webp" type="image/webp" />
+          <source media="(max-width: 768px)" srcset="/bare-mobile.png" type="image/png" />
+          <source srcset="/bare.webp" type="image/webp" />
+          <img
+            src="/bare.png"
+            alt=""
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width="1672"
+            height="941"
+          />
+        </picture>
       </div>
       <div class="cursor-glow"></div>
 
@@ -41,78 +55,78 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, onUnmounted } from 'vue';
+import { reactive, ref, onMounted, onUnmounted } from 'vue'
 
-const scrollProgress = ref(0);
-const isMobile = ref(false);
+const scrollProgress = ref(0)
+const isMobile = ref(false)
 
 const pos = reactive({
   x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
   y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0,
   scale: 1,
-});
+})
 
-let mouseX = pos.x;
-let mouseY = pos.y;
-let targetScale = 1;
-let rafId = null;
+let mouseX = pos.x
+let mouseY = pos.y
+let targetScale = 1
+let rafId = null
 
-const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+const lerp = (start, end, amt) => (1 - amt) * start + amt * end
 
 const handleMouseMove = (e) => {
-  const dx = e.clientX - mouseX;
-  const dy = e.clientY - mouseY;
-  const velocity = Math.sqrt(dx * dx + dy * dy);
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  targetScale = 1 + Math.min(velocity / 100, 0.5);
-};
+  const dx = e.clientX - mouseX
+  const dy = e.clientY - mouseY
+  const velocity = Math.sqrt(dx * dx + dy * dy)
+  mouseX = e.clientX
+  mouseY = e.clientY
+  targetScale = 1 + Math.min(velocity / 100, 0.5)
+}
 
 const handleScroll = () => {
-  scrollProgress.value = Math.min(window.scrollY / window.innerHeight, 1);
-};
+  scrollProgress.value = Math.min(window.scrollY / window.innerHeight, 1)
+}
 
 const update = () => {
-  pos.x = lerp(pos.x, mouseX, 0.1);
-  pos.y = lerp(pos.y, mouseY, 0.1);
-  pos.scale = lerp(pos.scale, targetScale, 0.1);
-  rafId = requestAnimationFrame(update);
-};
+  pos.x = lerp(pos.x, mouseX, 0.1)
+  pos.y = lerp(pos.y, mouseY, 0.1)
+  pos.scale = lerp(pos.scale, targetScale, 0.1)
+  rafId = requestAnimationFrame(update)
+}
 
 const checkMobile = () => {
-  const next = window.innerWidth <= 768;
-  if (next === isMobile.value) return;
+  const next = window.innerWidth <= 768
+  if (next === isMobile.value) return
 
-  isMobile.value = next;
+  isMobile.value = next
 
   if (isMobile.value) {
-    window.removeEventListener('mousemove', handleMouseMove);
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
+    window.removeEventListener('mousemove', handleMouseMove)
+    if (rafId) cancelAnimationFrame(rafId)
+    rafId = null
   } else {
-    window.addEventListener('mousemove', handleMouseMove);
-    if (!rafId) update();
+    window.addEventListener('mousemove', handleMouseMove)
+    if (!rafId) update()
   }
-};
+}
 
 onMounted(() => {
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-  window.addEventListener('scroll', handleScroll);
-  handleScroll();
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  window.addEventListener('scroll', handleScroll)
+  handleScroll()
 
   if (!isMobile.value) {
-    window.addEventListener('mousemove', handleMouseMove);
-    update();
+    window.addEventListener('mousemove', handleMouseMove)
+    update()
   }
-});
+})
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkMobile);
-  window.removeEventListener('mousemove', handleMouseMove);
-  window.removeEventListener('scroll', handleScroll);
-  if (rafId) cancelAnimationFrame(rafId);
-});
+  window.removeEventListener('resize', checkMobile)
+  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('scroll', handleScroll)
+  if (rafId) cancelAnimationFrame(rafId)
+})
 </script>
 
 <style scoped>
@@ -148,7 +162,9 @@ onUnmounted(() => {
   transform: scale(calc(1 + var(--scroll-progress) * 0.5));
   opacity: calc(1 - var(--scroll-progress) * 2);
   pointer-events: auto;
-  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  transition:
+    transform 0.1s ease-out,
+    opacity 0.1s ease-out;
 }
 
 .layer {
