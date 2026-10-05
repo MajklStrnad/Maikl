@@ -1,159 +1,123 @@
 <template>
-  <div class="prism-wrapper">
-    <div class="stage" :style="{ height: stageH + 'px', marginTop: topSpace + 'px' }">
-      <div
-        class="scene"
-        @pointerdown="onDown"
-        @pointermove="onMove"
-        @pointerup="onUp"
-        @pointercancel="onUp"
-        @pointerleave="onUp"
-      >
-        <div class="rotor" :class="{ dragging }" :style="rotorStyle">
-          <article
-            v-for="(c, i) in cards"
-            :key="i"
-            class="face"
-            :class="{ 'face--fun': c.type === 'fun' }"
-            :style="faceStyle(i)"
-          >
-            <!-- 01 — Bio -->
-            <template v-if="c.type === 'bio'">
-              <div class="label">01 / WHO</div>
-              <h3 class="card-title">Maikl</h3>
-              <p class="lead">Web developer &amp; cybersecurity student, based in Prague.</p>
-              <div class="status"><i></i> Available for work</div>
-            </template>
+  <div class="spiral-wrapper" ref="wrapEl">
+    <div class="scene">
+      <div class="world" ref="worldEl">
+        <article
+          v-for="(c, i) in cards"
+          :key="i"
+          :ref="(el) => (cardEls[i] = el)"
+          class="card"
+          :class="{ 'card--fun': c.type === 'fun' }"
+        >
+          <!-- 01 — Bio -->
+          <template v-if="c.type === 'bio'">
+            <div class="label">01 / WHO</div>
+            <h3 class="card-title">Maikl</h3>
+            <p class="lead">Web developer &amp; cybersecurity student, based in Prague.</p>
+            <div class="status"><i></i> Available for work</div>
+          </template>
 
-            <!-- 02 — Stack -->
-            <template v-else-if="c.type === 'stack'">
-              <div class="label">02 / STACK</div>
-              <h3 class="card-title">Tools of the trade</h3>
-              <div v-for="s in stack" :key="s.name" class="stack">
-                <div class="stack-head">{{ s.name }}</div>
-                <div class="chips">
-                  <span v-for="it in s.items" :key="it" class="chip">{{ it }}</span>
+          <!-- 02 — Stack -->
+          <template v-else-if="c.type === 'stack'">
+            <div class="label">02 / STACK</div>
+            <h3 class="card-title">Tools of the trade</h3>
+            <div v-for="s in stack" :key="s.name" class="stack">
+              <div class="stack-head">{{ s.name }}</div>
+              <div class="chips">
+                <span v-for="it in s.items" :key="it" class="chip">{{ it }}</span>
+              </div>
+            </div>
+          </template>
+
+          <!-- 03 — Journey -->
+          <template v-else-if="c.type === 'journey'">
+            <div class="label">03 / JOURNEY</div>
+            <h3 class="card-title">The path so far</h3>
+            <ul class="timeline">
+              <li v-for="j in journey" :key="j.title">
+                <span class="dot-mark"></span>
+                <div>
+                  <div class="t-title">{{ j.title }}</div>
+                  <div class="t-desc">{{ j.desc }}</div>
                 </div>
-              </div>
-            </template>
+              </li>
+            </ul>
+          </template>
 
-            <!-- 03 — Journey -->
-            <template v-else-if="c.type === 'journey'">
-              <div class="label">03 / JOURNEY</div>
-              <h3 class="card-title">The path so far</h3>
-              <ul class="timeline">
-                <li v-for="j in journey" :key="j.title">
-                  <span class="dot-mark"></span>
-                  <div>
-                    <div class="t-title">{{ j.title }}</div>
-                    <div class="t-desc">{{ j.desc }}</div>
-                  </div>
-                </li>
-              </ul>
-            </template>
+          <!-- 04 — Now -->
+          <template v-else-if="c.type === 'now'">
+            <div class="label">04 / NOW</div>
+            <h3 class="card-title">Currently</h3>
+            <ul class="now-list">
+              <li v-for="n in now" :key="n.k">
+                <span class="now-k">{{ n.k }}</span>
+                <span class="now-v">{{ n.v }}</span>
+              </li>
+            </ul>
+          </template>
 
-            <!-- 04 — Now -->
-            <template v-else-if="c.type === 'now'">
-              <div class="label">04 / NOW</div>
-              <h3 class="card-title">Currently</h3>
-              <ul class="now-list">
-                <li v-for="n in now" :key="n.k">
-                  <span class="now-k">{{ n.k }}</span>
-                  <span class="now-v">{{ n.v }}</span>
-                </li>
-              </ul>
-            </template>
+          <!-- 05 — Services -->
+          <template v-else-if="c.type === 'services'">
+            <div class="label">05 / WHAT I DO</div>
+            <h3 class="card-title">Services</h3>
+            <div class="services-grid">
+              <div v-for="s in services" :key="s" class="service">{{ s }}</div>
+            </div>
+          </template>
 
-            <!-- 05 — Services -->
-            <template v-else-if="c.type === 'services'">
-              <div class="label">05 / WHAT I DO</div>
-              <h3 class="card-title">Services</h3>
-              <div class="services-grid">
-                <div v-for="s in services" :key="s" class="service">{{ s }}</div>
-              </div>
-            </template>
+          <!-- 06 — Contact -->
+          <template v-else-if="c.type === 'contact'">
+            <div class="label">06 / CONTACT</div>
+            <h3 class="card-title">Let's talk</h3>
+            <div class="links">
+              <a class="link-row" href="mailto:maiklstrnad@gmail.com">
+                <span class="link-ico"><Icon icon="lucide:mail" aria-hidden="true" /></span>
+                <span class="link-text">maiklstrnad@gmail.com</span>
+                <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
+              </a>
+              <a class="link-row" href="https://github.com/MajklStrnad" target="_blank" rel="noopener">
+                <span class="link-ico"><Icon icon="simple-icons:github" aria-hidden="true" /></span>
+                <span class="link-text">github.com/MajklStrnad</span>
+                <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
+              </a>
+              <a class="link-row" href="https://www.linkedin.com/in/michal-strnad-11aa763b9/" target="_blank" rel="noopener">
+                <span class="link-ico"><Icon icon="simple-icons:linkedin" aria-hidden="true" /></span>
+                <span class="link-text">linkedin.com/in/michal-strnad</span>
+                <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
+              </a>
+              <a
+                class="link-row"
+                href="https://www.instagram.com/majkl_strnad/"
+                target="_blank"
+                rel="noopener"
+                @click="openInstagram"
+              >
+                <span class="link-ico"><Icon icon="simple-icons:instagram" aria-hidden="true" /></span>
+                <span class="link-text">@majkl_strnad</span>
+                <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
+              </a>
+            </div>
+            <RouterLink class="cta" to="/hire">START A PROJECT →</RouterLink>
+          </template>
 
-            <!-- 06 — Contact -->
-            <template v-else-if="c.type === 'contact'">
-              <div class="label">06 / CONTACT</div>
-              <h3 class="card-title">Let's talk</h3>
-              <div class="links">
-                <a class="link-row" href="mailto:maiklstrnad@gmail.com">
-                  <span class="link-ico">
-                    <Icon icon="lucide:mail" aria-hidden="true" />
-                  </span>
-                  <span class="link-text">maiklstrnad@gmail.com</span>
-                  <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
-                </a>
-                <a class="link-row" href="https://github.com/MajklStrnad" target="_blank" rel="noopener">
-                  <span class="link-ico">
-                    <Icon icon="simple-icons:github" aria-hidden="true" />
-                  </span>
-                  <span class="link-text">github.com/MajklStrnad</span>
-                  <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
-                </a>
-                <a class="link-row" href="https://www.linkedin.com/in/michal-strnad-11aa763b9/" target="_blank" rel="noopener">
-                  <span class="link-ico">
-                    <Icon icon="simple-icons:linkedin" aria-hidden="true" />
-                  </span>
-                  <span class="link-text">linkedin.com/in/michal-strnad</span>
-                  <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
-                </a>
-                <a
-                  class="link-row"
-                  href="https://www.instagram.com/majkl_strnad/"
-                  target="_blank"
-                  rel="noopener"
-                  @click="openInstagram"
-                >
-                  <span class="link-ico">
-                    <Icon icon="simple-icons:instagram" aria-hidden="true" />
-                  </span>
-                  <span class="link-text">@majkl_strnad</span>
-                  <span class="link-arrow"><Icon icon="lucide:arrow-up-right" aria-hidden="true" /></span>
-                </a>
-              </div>
-              <RouterLink class="cta" to="/hire">START A PROJECT →</RouterLink>
-            </template>
-
-            <!-- 07 — Bonus -->
-            <template v-else>
-              <div class="label">07 / P.S.</div>
-              <div class="ps-wrap">
-                <Icon class="ps-heart" icon="mdi:heart" aria-label="Heart" />
-                <span class="ps-glow"></span>
-              </div>
-              <p class="fun-text">// made with ♥ in Prague</p>
-            </template>
-          </article>
-        </div>
+          <!-- 07 — Bonus -->
+          <template v-else>
+            <div class="label">07 / P.S.</div>
+            <div class="ps-wrap">
+              <Icon class="ps-heart" icon="mdi:heart" aria-label="Heart" />
+              <span class="ps-glow"></span>
+            </div>
+            <p class="fun-text">// made with ♥ in Prague</p>
+          </template>
+        </article>
       </div>
-    </div>
-
-    <div class="nav-row">
-      <button class="arrow arrow-l" aria-label="Previous card" @click="prev">
-        <Icon icon="lucide:chevron-left" aria-hidden="true" />
-      </button>
-      <button class="arrow arrow-r" aria-label="Next card" @click="next">
-        <Icon icon="lucide:chevron-right" aria-hidden="true" />
-      </button>
-    </div>
-
-    <div class="dots">
-      <button
-        v-for="(_, i) in cards"
-        :key="i"
-        class="dot"
-        :class="{ on: i === activeFace }"
-        @click="goTo(i)"
-      ></button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { Icon } from '@iconify/vue'
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 /* ── card content ───────────────────────────────────────── */
 const stack = [
@@ -178,7 +142,6 @@ const services = [
   'Ongoing Support',
 ]
 
-/* ── prism geometry ─────────────────────────────────────── */
 const cards = [
   { type: 'bio' },
   { type: 'stack' },
@@ -188,23 +151,6 @@ const cards = [
   { type: 'contact' },
   { type: 'fun' },
 ]
-const N = cards.length
-const baseStep = 360 / N
-
-const cardW = ref(300)
-const cardH = ref(410)
-const stageH = ref(540)
-const topSpace = ref(0)
-
-const radius = computed(() => (cardW.value / 2) / Math.tan(Math.PI / N) * 1.12)
-
-function faceStyle(idx) {
-  return {
-    width: cardW.value + 'px',
-    height: cardH.value + 'px',
-    transform: `translate(-50%, -50%) rotateY(${baseStep * idx}deg) translateZ(${radius.value}px)`,
-  }
-}
 
 /* ── instagram: try the app, fall back to the web page ───── */
 function openInstagram(e) {
@@ -227,287 +173,234 @@ function openInstagram(e) {
   }, 1000)
 }
 
-/* ── rotation state ─────────────────────────────────────── */
-const index = ref(0)
-const rotation = ref(0)
-const dragging = ref(false)
+/* ── spiral ─────────────────────────────────────────────── */
+const N = cards.length
+const STEP = .8   // angle between cards (rad)
+const DY = 160     // vertical spacing
+const R = 700      // helix radius
 
-const rotorStyle = computed(() => ({
-  transform: `translateZ(${-radius.value}px) rotateY(${rotation.value}deg)`,
-}))
+const SNAP = 0.06   // how strongly cards settle onto a face when idle (0 = never snap)
+const ACTIVE_RANGE = 0.5 // how close to the front a card must be to count as active
 
-const activeFace = computed(() => ((index.value % N) + N) % N)
+const wrapEl = ref(null)
+const worldEl = ref(null)
+const cardEls = []
+const activeFlags = [] // last applied active state per card, so the DOM is only touched on change
 
-function go(d) {
-  index.value += d
-  rotation.value -= baseStep * d
+let p = N / 2   // helix position (N/2 = first card in front)
+let boost = 0
+let touchY = null
+let raf = null
+let visible = true
+let io = null
+
+function onWheel(e) {
+  e.preventDefault() // the spiral owns the wheel while the cursor is over it
+  const unit = e.deltaMode === 1 ? 33 : 1
+  boost -= e.deltaY * unit * 0.0006
 }
-const next = () => go(1)
-const prev = () => go(-1)
-
-function goTo(i) {
-  let d = ((i - activeFace.value) % N + N) % N
-  if (d > N / 2) d -= N
-  go(d)
+function onTouchStart(e) { touchY = e.touches[0].clientY }
+function onTouchMove(e) {
+  const y = e.touches[0].clientY
+  boost -= (touchY - y) * 0.0012
+  touchY = y
 }
-
-/* ── drag to spin (mouse + finger) ───────────────────────── */
-let startX = 0
-let startY = 0
-let baseRotation = 0
-let pressing = false
-let pointerId = null
-let history = []
-const DRAG_THRESHOLD = 6
-const FLICK_VELOCITY = 0.45
-
-const degPerPx = computed(() => 60 / cardW.value)
-
-function onDown(e) {
-  if (e.target.closest('a, button')) return
-  pressing = true
-  startX = e.clientX
-  startY = e.clientY
-  baseRotation = rotation.value
-  pointerId = e.pointerId
-  history = [{ x: e.clientX, t: performance.now() }]
-  e.currentTarget.setPointerCapture?.(pointerId)
-}
-
-function onMove(e) {
-  if (!pressing || e.pointerId !== pointerId) return
-  const dx = e.clientX - startX
-  const dy = e.clientY - startY
-
-  if (!dragging.value) {
-    // If vertical movement dominates, abort and let the browser scroll
-    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > DRAG_THRESHOLD) {
-      pressing = false
-      pointerId = null
-      history = []
-      return
-    }
-    if (Math.abs(dx) > DRAG_THRESHOLD) {
-      dragging.value = true
-      e.preventDefault()
-    } else {
-      return
-    }
-  }
-
-  if (dragging.value) {
-    e.preventDefault()
-    rotation.value = baseRotation + dx * degPerPx.value
-    history.push({ x: e.clientX, t: performance.now() })
-    if (history.length > 6) history.shift()
-  }
-}
-
-function onUp() {
-  if (!pressing) return
-  pressing = false
-
-  if (!dragging.value) {
-    history = []
-    return
-  }
-  dragging.value = false
-
-  let velocity = 0
-  if (history.length >= 2) {
-    const first = history[0]
-    const last = history[history.length - 1]
-    const dt = last.t - first.t
-    if (dt > 0) velocity = (last.x - first.x) / dt
-  }
-  history = []
-
-  if (Math.abs(velocity) > FLICK_VELOCITY) {
-    index.value += velocity > 0 ? -1 : 1
-  } else {
-    index.value = Math.round(-rotation.value / baseStep)
-  }
-  rotation.value = -index.value * baseStep
-}
-
-/* ── keyboard ───────────────────────────────────────────── */
 function onKey(e) {
-  if (e.key === 'ArrowRight') next()
-  else if (e.key === 'ArrowLeft') prev()
+  if (!visible) return
+  if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { boost -= 0.04; e.preventDefault() }
+  if (e.key === 'ArrowUp' || e.key === 'PageUp') { boost += 0.04; e.preventDefault() }
 }
 
-/* ── responsive sizing ──────────────────────────────────── */
-let resizeRaf = null
-const MOBILE_BREAKPOINT = 480
-const MOBILE_TOP_SPACE = 60
-const MOBILE_HEIGHT_CAP = 420
-const DESKTOP_HEIGHT_CAP = 560
+function frame() {
+  raf = requestAnimationFrame(frame)
+  if (!visible) return
 
-function computeSize() {
-  const vw = window.visualViewport?.width ?? window.innerWidth
-  const vh = window.visualViewport?.height ?? window.innerHeight
+  boost *= 0.92
+  if (Math.abs(boost) < 1e-5) boost = 0
+  p += boost
 
-  const isMobile = vw < MOBILE_BREAKPOINT
-  const extraTop = isMobile ? MOBILE_TOP_SPACE : 0
-
-  const chromeH = 170
-  const availH = Math.max(200, vh - chromeH - extraTop)
-  const availW = Math.max(160, vw - 24)
-
-  let w
-  if (vw < 480) {
-    w = vw * 0.72
-  } else if (vw < 900) {
-    w = Math.min(320, vw * 0.42)
-  } else {
-    w = 350
+  // idle: ease onto the nearest card so content stays readable
+  if (SNAP && Math.abs(boost) < 0.004) {
+    const target = Math.round(p - N / 2) + N / 2
+    p += (target - p) * SNAP
   }
-  w = Math.min(w, availW)
+  p = ((p % N) + N) % N // keep p bounded; the helix is periodic so this is seamless
 
-  const heightCap = isMobile ? MOBILE_HEIGHT_CAP : DESKTOP_HEIGHT_CAP
-  const h = Math.min(availH, heightCap)
+  if (worldEl.value) worldEl.value.style.transform = `translateZ(${-R}px) rotateX(-6deg)`
 
-  cardW.value = Math.round(Math.max(180, w))
-  cardH.value = Math.round(Math.max(240, h))
-  stageH.value = cardH.value
-  topSpace.value = extraTop
-}
+  for (let i = 0; i < N; i++) {
+    const el = cardEls[i]
+    if (!el) continue
+    // s: signed position along the helix, wraps -N/2..N/2
+    const s = ((((i + p) % N) + N) % N) - N / 2
+    const ang = s * STEP
+    const y = s * DY
+    const d = Math.abs(s) / (N / 2)
+    const fade = Math.min((1 - d) / 0.4, 1)
 
-function onResize() {
-  if (resizeRaf) cancelAnimationFrame(resizeRaf)
-  resizeRaf = requestAnimationFrame(computeSize)
+    // the card facing the viewer gets the "hover" look and is the only one that takes clicks
+    const active = Math.abs(s) < ACTIVE_RANGE
+    if (active !== activeFlags[i]) {
+      activeFlags[i] = active
+      el.classList.toggle('is-active', active)
+    }
+
+    el.style.transform = `translateY(${y}px) rotateY(${ang}rad) translateZ(${R}px)`
+    el.style.pointerEvents = active ? 'auto' : 'none'
+    el.style.opacity = Math.max(fade, 0)
+    el.style.zIndex = Math.round(1000 - Math.abs(s) * 10)
+    el.style.filter = `blur(${(Math.abs(s) * 0.9).toFixed(1)}px) brightness(${(1 - d * 0.3).toFixed(2)})`
+  }
 }
 
 onMounted(() => {
-  computeSize()
+  const w = wrapEl.value
+  w.addEventListener('wheel', onWheel, { passive: false })
+  w.addEventListener('touchstart', onTouchStart, { passive: true })
+  w.addEventListener('touchmove', onTouchMove, { passive: true })
   window.addEventListener('keydown', onKey)
-  window.addEventListener('resize', onResize)
-  window.addEventListener('orientationchange', onResize)
-  window.visualViewport?.addEventListener('resize', onResize)
+  io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting })
+  io.observe(w)
+  raf = requestAnimationFrame(frame)
 })
 onBeforeUnmount(() => {
+  const w = wrapEl.value
+  if (w) {
+    w.removeEventListener('wheel', onWheel)
+    w.removeEventListener('touchstart', onTouchStart)
+    w.removeEventListener('touchmove', onTouchMove)
+  }
   window.removeEventListener('keydown', onKey)
-  window.removeEventListener('resize', onResize)
-  window.removeEventListener('orientationchange', onResize)
-  window.visualViewport?.removeEventListener('resize', onResize)
-  if (resizeRaf) cancelAnimationFrame(resizeRaf)
+  if (io) io.disconnect()
+  if (raf) cancelAnimationFrame(raf)
 })
 </script>
 
-<style scoped>
-:global(html),
-:global(body) {
-  overflow-x: hidden;
-  max-width: 100%;
+<style>
+/* registered globally so the browser can animate the angle */
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 135deg;
 }
+</style>
 
-.prism-wrapper {
+<style scoped>
+.spiral-wrapper {
+  --cw: 340px;
+  --ch: 440px;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100svh;
-  min-height: 100vh;
-  max-width: 100vw;
-  padding: 20px;
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
-  padding-left: max(20px, env(safe-area-inset-left));
-  padding-right: max(20px, env(safe-area-inset-right));
+  width: 100%;
+  touch-action: none;
+  height: 100vh;
+  height: 100svh;
   background-color: var(--bg-color, #111);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  box-sizing: border-box;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
 }
 
-.stage {
-  position: relative;
-  width: min(960px, 100%);
-  max-width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: margin-top 0.2s ease;
-}
-
 .scene {
   position: absolute;
   inset: 0;
-  perspective: 1200px;
+  perspective: 1500px;
   perspective-origin: 50% 50%;
-  touch-action: pan-y;
-  cursor: grab;
-  padding: 20px;
-  -webkit-tap-highlight-color: transparent;
+  pointer-events: none;
 }
-.scene:active { cursor: grabbing; }
-
-.rotor {
+.world {
   position: absolute;
-  top: 50%;
   left: 50%;
+  top: 50%;
   width: 0;
   height: 0;
   transform-style: preserve-3d;
-  transition: transform 680ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-.rotor.dragging { transition: none; }
 
-.face {
+.card {
   position: absolute;
-  top: 0;
-  left: 0;
-  backface-visibility: hidden;
-  user-select: none;
+  width: var(--cw);
+  height: var(--ch);
+  margin: calc(var(--ch) / -2) 0 0 calc(var(--cw) / -2);
+  box-sizing: border-box;
+  overflow: hidden;
+  will-change: transform, opacity, filter;
+  backface-visibility: visible;
+  pointer-events: none;
   border-radius: 2px;
-  padding: clamp(24px, 9%, 44px) clamp(18px, 9%, 36px);
+  padding: 40px 32px;
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 3vw, 15px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  touch-action: pan-y;
+  gap: 15px;
   background: linear-gradient(145deg, #161616, #0d0d0d);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  /* `translate` is separate from `transform`, so the lift eases
+     independently of the per-frame transform set from JS */
+  transition: border-color 0.3s ease, translate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
 }
-.face::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+
+/* rotating gradient border (same as the pricing cards' hover) */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    var(--border-angle),
+    rgba(255, 192, 203, 0.9) 0%,
+    rgba(255, 192, 203, 0.7) 15%,
+    rgba(255, 192, 203, 0.15) 30%,
+    rgba(255, 192, 203, 0) 36%,
+    rgba(255, 192, 203, 0) 64%,
+    rgba(255, 192, 203, 0.15) 70%,
+    rgba(255, 192, 203, 0.7) 85%,
+    rgba(255, 192, 203, 0.9) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  animation: border-spin 4.6s infinite;
+  animation-play-state: paused;
 }
-.face:hover {
-  border-color: rgba(255, 192, 203, 0.3);
+
+@keyframes border-spin {
+  0%   { --border-angle: 135deg; animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1); }
+  50%  { --border-angle: 315deg; animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1); }
+  100% { --border-angle: 495deg; }
+}
+
+/* the card currently facing the viewer */
+.card.is-active { translate: 0 -15px; }
+.card.is-active::after {
+  opacity: 1;
+  animation-play-state: running;
 }
 
 .label {
-  font-size: clamp(0.62rem, 1.6vw, 0.72rem);
+  font-size: 0.72rem;
   font-weight: 300;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: #ffd1dc;
   flex: 0 0 auto;
 }
-
 .card-title {
-  font-size: clamp(1.1rem, 4vw, 1.35rem);
+  margin: 0;
+  font-size: 1.35rem;
   font-weight: 100;
   letter-spacing: 0.04em;
   line-height: 1.3;
   color: #ffffff;
   flex: 0 0 auto;
 }
-
-.lead { font-size: clamp(13px, 3.4vw, 15px); line-height: 1.6; font-weight: 300; color: rgba(255, 255, 255, 0.75); }
+.lead { margin: 0; font-size: 15px; line-height: 1.6; font-weight: 300; color: rgba(255, 255, 255, 0.75); }
 
 .status {
   margin-top: auto;
@@ -554,7 +447,7 @@ onBeforeUnmount(() => {
 }
 .chip:hover { color: #fff; border-color: rgba(255, 192, 203, 0.4); }
 
-.timeline { list-style: none; display: flex; flex-direction: column; gap: 15px; margin-top: 4px; padding: 0; }
+.timeline { list-style: none; display: flex; flex-direction: column; gap: 15px; margin: 4px 0 0; padding: 0; }
 .timeline li { position: relative; display: flex; gap: 14px; }
 .timeline li::after {
   content: '';
@@ -575,7 +468,7 @@ onBeforeUnmount(() => {
 .t-title { font-size: 14px; font-weight: 400; color: #f2f2f2; }
 .t-desc { font-size: 12.5px; line-height: 1.5; font-weight: 300; color: rgba(255, 255, 255, 0.5); }
 
-.now-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 4px; padding: 0; }
+.now-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin: 4px 0 0; padding: 0; }
 .now-list li {
   display: flex; flex-direction: column; gap: 2px;
   padding-bottom: 10px;
@@ -591,9 +484,9 @@ onBeforeUnmount(() => {
 }
 .now-v { font-size: 14px; font-weight: 300; color: rgba(255, 255, 255, 0.8); }
 
-.services-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(8px, 3vw, 14px); margin-top: 6px; }
+.services-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 6px; }
 .service {
-  padding: clamp(14px, 4.5vw, 20px) clamp(10px, 3.6vw, 14px);
+  padding: 20px 14px;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -625,8 +518,6 @@ onBeforeUnmount(() => {
 .link-ico {
   flex: 0 0 30px; height: 30px;
   display: grid; place-items: center;
-  font-size: 10px;
-  font-weight: 300;
   color: #ffd1dc;
 }
 .link-ico :deep(svg),
@@ -651,11 +542,11 @@ onBeforeUnmount(() => {
   display: block;
   text-align: center;
   text-decoration: none;
-  font-size: clamp(0.66rem, 2vw, 0.75rem);
+  font-size: 0.75rem;
   font-weight: 300;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  padding: clamp(13px, 4vw, 16px) 0;
+  padding: 16px 0;
   border-radius: 2px;
   color: #fff;
   background: #141414;
@@ -692,20 +583,19 @@ onBeforeUnmount(() => {
   z-index: -1;
 }
 .cta:hover { letter-spacing: 0.4em; transform: scale(1.02); }
-
 @keyframes rotate-gradient {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
 
-.face--fun { align-items: center; justify-content: center; }
-.face--fun .label { position: absolute; top: clamp(24px, 9%, 44px); left: clamp(18px, 9%, 36px); }
+.card--fun { align-items: center; justify-content: center; }
+.card--fun .label { position: absolute; top: 40px; left: 32px; }
 
 .ps-wrap { position: relative; display: grid; place-items: center; }
 .ps-heart {
   position: relative;
   z-index: 1;
-  width: clamp(70px, 24vw, 110px);
+  width: 110px;
   height: auto;
   color: #ffd1dc;
   fill: currentColor;
@@ -722,8 +612,8 @@ onBeforeUnmount(() => {
 }
 .ps-glow {
   position: absolute;
-  width: clamp(100px, 32vw, 150px);
-  height: clamp(100px, 32vw, 150px);
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 192, 203, 0.3), transparent 68%);
   pointer-events: none;
@@ -736,7 +626,8 @@ onBeforeUnmount(() => {
 .fun-text {
   position: absolute;
   left: 0; right: 0;
-  bottom: clamp(20px, 8%, 36px);
+  bottom: 36px;
+  margin: 0;
   text-align: center;
   font-family: monospace;
   font-size: 12.5px;
@@ -745,93 +636,25 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.arrow {
-  position: relative;
-  z-index: 30;
-  width: 50px; height: 50px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 24px;
-  font-weight: 200;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(20, 20, 20, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  transition: border-color 0.25s, color 0.25s, transform 0.2s, background 0.2s;
-  flex: 0 0 auto;
-}
-.arrow:hover {
-  color: #fff;
-  border-color: rgba(255, 192, 203, 0.4);
-  background: rgba(20, 20, 20, 0.85);
-  transform: scale(1.08);
-}
-.arrow:active { transform: scale(0.95); }
-.arrow :deep(svg) {
-  width: 26px;
-  height: 26px;
-}
-
-.nav-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  margin-top: clamp(14px, 3vw, 24px);
-  flex: 0 0 auto;
-}
-
-.dots {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: clamp(12px, 2.6vw, 18px);
-  padding: 0 8px;
-}
-.dot {
-  width: 8px; height: 8px;
-  padding: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: transparent;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  flex: 0 0 auto;
-}
-.dot.on {
-  width: 26px;
-  border-radius: 100px;
-  border-color: transparent;
-  background: #ffc0cb;
-  box-shadow: 0 0 10px rgba(255, 192, 203, 0.5);
-}
-
-@media (max-width: 600px) {
-  .arrow { width: 44px; height: 44px; font-size: 21px; }
-}
-
-@media (max-width: 380px) {
-  .arrow { width: 40px; height: 40px; font-size: 18px; }
-}
-
-@media (max-height: 480px) {
-  .prism-wrapper { padding-top: 10px; padding-bottom: 10px; }
-  .nav-row { margin-top: 8px; }
-  .dots { margin-top: 8px; }
-}
-
-@media (min-width: 1200px) {
-  .face { padding: 48px 40px; }
+/* ── desktop: wider, lower cards ── */
+@media (min-width: 900px) {
+  .spiral-wrapper { --cw: 540px; --ch: 340px; }
+  .card { padding: 30px 38px; gap: 12px; }
+  .card--fun .label { top: 30px; left: 38px; }
+  .fun-text { bottom: 26px; }
+  .ps-heart { width: 84px; }
+  .services-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .service { padding: 26px 12px; }
+  .timeline { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .timeline li::after { display: none; }
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .link-row { padding: 10px 12px; }
+  .link-row:hover { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cta::before, .status i, .ps-heart, .ps-glow { animation: none !important; }
-  .rotor { transition-duration: 200ms; }
-}
-
-@media (hover: none) {
-  .arrow:hover { transform: none; }
+  .card::after { animation: none !important; }
+  .card { transition: border-color 0.3s ease; }
 }
 </style>
