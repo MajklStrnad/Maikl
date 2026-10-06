@@ -142,7 +142,7 @@ const services = [
   'Ongoing Support',
 ]
 
-const cards = [
+const baseCards = [
   { type: 'bio' },
   { type: 'stack' },
   { type: 'journey' },
@@ -151,6 +151,7 @@ const cards = [
   { type: 'contact' },
   { type: 'fun' },
 ]
+const cards = [...baseCards, ...baseCards] // 14 slots, denser helix
 
 /* ── instagram: try the app, fall back to the web page ───── */
 function openInstagram(e) {
@@ -175,56 +176,87 @@ function openInstagram(e) {
 
 /* ── spiral ─────────────────────────────────────────────── */
 const N = cards.length
-const STEP = .8   // angle between cards (rad)
-const DY = 160     // vertical spacing
-const R = 700      // helix radius
-
-const SNAP = 0.06   // how strongly cards settle onto a face when idle (0 = never snap)
-const ACTIVE_RANGE = 0.5 // how close to the front a card must be to count as active
+const STEP = 0.52          // angle between cards (rad)
+const SNAP = true          // settle onto a card when idle
+const ACTIVE_RANGE = 0.5   // how close to the front a card must be to count as active
+const INTRO_MS = 1800
+const EASE_RATE = 8        // how quickly p chases the target
 
 const wrapEl = ref(null)
 const worldEl = ref(null)
 const cardEls = []
 const activeFlags = [] // last applied active state per card, so the DOM is only touched on change
 
-let p = N / 2   // helix position (N/2 = first card in front)
-let boost = 0
+let R = 760                // helix radius, scaled to card width in updateGeometry()
+let DY = 190               // vertical spacing, ~56% of card height
+let cardScale = 0.8        // visual card size multiplier (set in updateGeometry)
+let dir = 0                // direction of the last input, used to page on snap
+let snapped = true
+let p = N / 2              // current position (N/2 = first card in front)
+let tp = N / 2             // target position
 let touchY = null
+let lastInput = 0
+let t0 = 0
+let last = 0
 let raf = null
 let visible = true
 let io = null
 
+const ease = (t) => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 3) // capped at 1 once the intro is done
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
+
+// the reference was tuned for 360px cards, so scale radius + perspective with card width
+function updateGeometry() {
+  const desktop = window.innerWidth >= 900
+  const cw = desktop ? 540 : 340
+  const ch = desktop ? 340 : 440
+  cardScale = desktop ? 0.8 : 0.9 // shrinks the whole card, content included
+  const k = (cw * cardScale) / 360
+  R = 760 * k
+  DY = ch * cardScale * 0.5625
+  if (wrapEl.value) wrapEl.value.style.setProperty('--persp', `${1300 * k}px`)
+}
+
+function nudge(d) {
+  tp += d
+  dir = Math.sign(d) || dir
+  snapped = false
+  lastInput = performance.now()
+}
+
 function onWheel(e) {
   e.preventDefault() // the spiral owns the wheel while the cursor is over it
   const unit = e.deltaMode === 1 ? 33 : 1
-  boost -= e.deltaY * unit * 0.0006
+  nudge(-clamp(e.deltaY * unit, -120, 120) * 0.0035)
 }
 function onTouchStart(e) { touchY = e.touches[0].clientY }
 function onTouchMove(e) {
   const y = e.touches[0].clientY
-  boost -= (touchY - y) * 0.0012
+  nudge((y - touchY) * 0.006)
   touchY = y
 }
+function onTouchEnd() { touchY = null; lastInput = performance.now() }
 function onKey(e) {
   if (!visible) return
-  if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { boost -= 0.04; e.preventDefault() }
-  if (e.key === 'ArrowUp' || e.key === 'PageUp') { boost += 0.04; e.preventDefault() }
+  if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { nudge(-1); e.preventDefault() }
+  if (e.key === 'ArrowUp' || e.key === 'PageUp') { nudge(1); e.preventDefault() }
 }
 
-function frame() {
+function frame(now) {
   raf = requestAnimationFrame(frame)
+  const dt = clamp(now - last, 0, 50) / 1000
+  last = now
   if (!visible) return
 
-  boost *= 0.92
-  if (Math.abs(boost) < 1e-5) boost = 0
-  p += boost
+  const intro = ease((now - t0) / INTRO_MS)
 
-  // idle: ease onto the nearest card so content stays readable
-  if (SNAP && Math.abs(boost) < 0.004) {
-    const target = Math.round(p - N / 2) + N / 2
-    p += (target - p) * SNAP
+  // idle: aim the target at the nearest card so content stays readable
+  // lean the rounding toward the scroll direction so a single wheel notch still pages one card
+  if (SNAP && !snapped && touchY === null && now - lastInput > 140) {
+    tp = Math.round(tp - N / 2 + dir * 0.4) + N / 2
+    snapped = true
   }
-  p = ((p % N) + N) % N // keep p bounded; the helix is periodic so this is seamless
+  p += (tp - p) * (1 - Math.exp(-dt * EASE_RATE))
 
   if (worldEl.value) worldEl.value.style.transform = `translateZ(${-R}px) rotateX(-6deg)`
 
@@ -233,34 +265,40 @@ function frame() {
     if (!el) continue
     // s: signed position along the helix, wraps -N/2..N/2
     const s = ((((i + p) % N) + N) % N) - N / 2
-    const ang = s * STEP
-    const y = s * DY
+    const ang = s * STEP * intro
+    const y = s * DY * intro
     const d = Math.abs(s) / (N / 2)
-    const fade = Math.min((1 - d) / 0.4, 1)
+    const o = clamp((1 - d) / 0.25, 0, 1) * intro
 
     // the card facing the viewer gets the "hover" look and is the only one that takes clicks
-    const active = Math.abs(s) < ACTIVE_RANGE
+    const active = intro > 0.98 && Math.abs(s) < ACTIVE_RANGE
     if (active !== activeFlags[i]) {
       activeFlags[i] = active
       el.classList.toggle('is-active', active)
     }
 
-    el.style.transform = `translateY(${y}px) rotateY(${ang}rad) translateZ(${R}px)`
+    el.style.transform = `translateY(${y}px) rotateY(${ang}rad) translateZ(${R}px) scale(${cardScale})`
     el.style.pointerEvents = active ? 'auto' : 'none'
-    el.style.opacity = Math.max(fade, 0)
+    el.style.opacity = o
+    el.style.visibility = o > 0.01 ? 'visible' : 'hidden'
     el.style.zIndex = Math.round(1000 - Math.abs(s) * 10)
-    el.style.filter = `blur(${(Math.abs(s) * 0.9).toFixed(1)}px) brightness(${(1 - d * 0.3).toFixed(2)})`
+    el.style.filter = `brightness(${(1 - d * 0.5).toFixed(2)})`
   }
 }
 
 onMounted(() => {
   const w = wrapEl.value
+  updateGeometry()
+  window.addEventListener('resize', updateGeometry)
   w.addEventListener('wheel', onWheel, { passive: false })
   w.addEventListener('touchstart', onTouchStart, { passive: true })
   w.addEventListener('touchmove', onTouchMove, { passive: true })
+  w.addEventListener('touchend', onTouchEnd, { passive: true })
+  w.addEventListener('touchcancel', onTouchEnd, { passive: true })
   window.addEventListener('keydown', onKey)
   io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting })
   io.observe(w)
+  t0 = last = performance.now()
   raf = requestAnimationFrame(frame)
 })
 onBeforeUnmount(() => {
@@ -269,7 +307,10 @@ onBeforeUnmount(() => {
     w.removeEventListener('wheel', onWheel)
     w.removeEventListener('touchstart', onTouchStart)
     w.removeEventListener('touchmove', onTouchMove)
+    w.removeEventListener('touchend', onTouchEnd)
+    w.removeEventListener('touchcancel', onTouchEnd)
   }
+  window.removeEventListener('resize', updateGeometry)
   window.removeEventListener('keydown', onKey)
   if (io) io.disconnect()
   if (raf) cancelAnimationFrame(raf)
@@ -305,7 +346,7 @@ onBeforeUnmount(() => {
 .scene {
   position: absolute;
   inset: 0;
-  perspective: 1500px;
+  perspective: var(--persp, 1300px);
   perspective-origin: 50% 50%;
   pointer-events: none;
 }
