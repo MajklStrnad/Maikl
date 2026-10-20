@@ -2,6 +2,7 @@
   <div class="spiral-wrapper" ref="wrapEl">
     <div class="scene">
       <div class="world" ref="worldEl">
+        <SakuraBlossom ref="blossom" />
         <article
           v-for="(c, i) in cards"
           :key="i"
@@ -118,6 +119,8 @@
 <script setup>
 import { Icon } from '@iconify/vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import SakuraBlossom from '@/components/SakuraBlossom.vue'
+const blossom = ref(null)
 
 /* ── card content ───────────────────────────────────────── */
 const stack = [
@@ -214,6 +217,7 @@ function updateGeometry() {
   const k = (cw * cardScale) / 360
   R = 760 * k
   DY = ch * cardScale * 0.5625
+  blossom.value?.resize(R * 1.6)
   if (wrapEl.value) wrapEl.value.style.setProperty('--persp', `${1300 * k}px`)
 }
 
@@ -257,6 +261,7 @@ function frame(now) {
     snapped = true
   }
   p += (tp - p) * (1 - Math.exp(-dt * EASE_RATE))
+  blossom.value?.update((p - N / 2) * STEP, intro)
 
   if (worldEl.value) worldEl.value.style.transform = `translateZ(${-R}px) rotateX(-6deg)`
 
