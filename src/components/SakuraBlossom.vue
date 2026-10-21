@@ -220,5 +220,22 @@ onBeforeUnmount(() => {
   pointer-events: none;
   /* cancels the world's rotateX(-6deg) so the canvas faces the viewer */
   transform: rotateX(6deg);
+  animation: float 5s infinite;
+  transform-origin: 50% 80%;
+  will-change: transform;
+}
+
+@keyframes float {
+  0% {
+    transform: translate3d(0, 0, 0) rotateX(6deg);
+    animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1);   /* soft lift-off, slows into the peak */
+  }
+  50% {
+    transform: translate3d(0, -5rem, 0) rotateX(8deg);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);  /* smooth, slightly heavier descent */
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotateX(6deg);
+  }
 }
 </style>

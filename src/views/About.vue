@@ -184,6 +184,7 @@ const SNAP = true          // settle onto a card when idle
 const ACTIVE_RANGE = 0.5   // how close to the front a card must be to count as active
 const INTRO_MS = 1800
 const EASE_RATE = 8        // how quickly p chases the target
+const BLOSSOM_SPIN = 0.67
 
 const wrapEl = ref(null)
 const worldEl = ref(null)
@@ -261,7 +262,7 @@ function frame(now) {
     snapped = true
   }
   p += (tp - p) * (1 - Math.exp(-dt * EASE_RATE))
-  blossom.value?.update((p - N / 2) * STEP, intro)
+  blossom.value?.update((p - N / 2) * STEP * BLOSSOM_SPIN, intro)
 
   if (worldEl.value) worldEl.value.style.transform = `translateZ(${-R}px) rotateX(-6deg)`
 
