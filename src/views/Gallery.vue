@@ -121,7 +121,15 @@ const projects = [
     image: galaxyThumb,
     linkLabel: 'View animation →',
   },
-  { id: 5 },
+  {
+    id: 5,
+    real: true,
+    title: 'Maikl',
+    category: 'Website',
+    url: '/fancy.html',
+    image: sakuraBranch,
+    linkLabel: 'View website →',
+  },
 ]
 
 // A "static" link is a plain file served as-is (an .html file in public/,

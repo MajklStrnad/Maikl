@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Polymorphic Capital — Morphing ahead of paradigms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --lavender: #ecedfa;
+    --black: #0f0f10;
+    --text: #151516;
+    --pad-t: 14px;
+    --pad-b: 16px;
+    --pad-x: 16px;
+    --btn: 56px;
+    /* fluid scale unit used by the tiles (0.683px on a 1500px page) */
+    --u: clamp(0.56px, 0.5px + 0.0122vw, 0.683px);
+  }
+
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  html, body { background: #fff; }
+
+  body {
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #141414;
+    padding: var(--pad-t) var(--pad-x) var(--pad-b);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  img, svg { max-width: 100%; }
+
+  .page { max-width: 1500px; margin: 0 auto; }
+
+  /* ---------- Inverted-corner notches ---------- */
+  .notch::before, .notch::after,
+  .footer-social::before, .footer-social::after {
+    content: "";
+    position: absolute;
+    width: var(--radius);
+    height: var(--radius);
+    background: var(--fill);
+    -webkit-mask: radial-gradient(circle at var(--cut),
+                          transparent calc(var(--radius) - 0.5px),
+                          #000 var(--radius));
+    mask: radial-gradient(circle at var(--cut),
+                          transparent calc(var(--radius) - 0.5px),
+                          #000 var(--radius));
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    --radius: 22px;
+    --header-h: 74px;
+    position: relative;
+    height: calc(100vh - var(--pad-t) - var(--pad-b));
+    height: calc(100svh - var(--pad-t) - var(--pad-b));
+    min-height: 460px;
+    border-radius: 26px;
+    overflow: hidden;
+    background: #eae6f7;
+  }
+
+  .hero-image {
+    position: absolute;
+    inset: 0;
+    background-image: url(background.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .notch {
+    --fill: #fff;
+    position: absolute;
+    top: 0;
+    height: var(--header-h);
+    background: var(--fill);
+    display: flex;
+    align-items: center;
+    z-index: 3;
+  }
+
+  .notch-logo {
+    --cut: 100% 100%;
+    left: 0;
+    width: clamp(240px, 26.8%, 392px);
+    border-radius: 0 0 var(--radius) 0;
+  }
+  .notch-logo::before { left: 100%; top: 0; }
+  .notch-logo::after  { left: 0; top: 100%; }
+
+  .notch-contact {
+    --cut: 0 100%;
+    right: 0;
+    padding: 9px;
+    gap: 8px;
+    border-radius: 0 0 0 var(--radius);
+  }
+  .notch-contact::before { right: 100%; top: 0; }
+  .notch-contact::after  { right: 0; top: 100%; }
+
+  .notch-scroll {
+    --cut: 100% 0;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 39.5%;
+    height: calc(56px + 9px * 2);
+    padding: 9px;
+    justify-content: flex-end;
+    border-radius: 0 var(--radius) 0 0;
+  }
+  .notch-scroll::before { left: 100%; bottom: 0; }
+  .notch-scroll::after  { left: 0; bottom: 100%; }
+
+  .brand {
+    height: 100%;
+    padding-left: clamp(20px, 3vw, 45px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #111;
+  }
+  .brand svg { width: 34px; height: 34px; flex: none; }
+  .brand-name {
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.055em;
+    line-height: 1.16;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .nav {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, 3vw, 58px);
+    z-index: 2;
+  }
+  .nav a {
+    color: #1a1a1c;
+    text-decoration: none;
+    font-size: clamp(13px, 1.1vw, 16px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .contact-btn {
+    width: clamp(190px, 25.3vw, 379px);
+    height: var(--btn);
+    padding: 0 19px 0 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--black);
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    border-radius: 20px;
+  }
+
+  .scroll-btn, .menu-btn {
+    width: var(--btn);
+    height: var(--btn);
+    border: none;
+    cursor: pointer;
+    border-radius: 15px;
+    background: var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+  .scroll-btn .icon, .menu-btn .icon { width: 20px; height: 20px; }
+  .menu-btn { display: none; }
+
+  .contact-btn, .scroll-btn, .menu-btn { transition: background 0.2s ease; }
+  .contact-btn:focus-visible, .scroll-btn:focus-visible, .menu-btn:focus-visible,
+  .nav a:focus-visible, .mobile-menu a:focus-visible {
+    outline: 2px solid #6b6ef0;
+    outline-offset: 2px;
+  }
+
+  .icon { width: 18px; height: 18px; flex: none; }
+
+  .headline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    padding: 0 clamp(20px, 2.8vw, 42px);
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .headline span {
+    font-size: clamp(34px, 7.85vw, 112px);
+    font-weight: 500;
+    letter-spacing: -0.038em;
+    line-height: 1;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .headline span:last-child { align-self: flex-end; }
+
+  /* Mobile menu panel */
+  .mobile-menu {
+    position: absolute;
+    z-index: 4;
+    top: calc(var(--header-h) + 10px);
+    right: 10px;
+    width: min(340px, calc(100% - 20px));
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 12px 40px rgba(15, 15, 16, 0.14);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+  }
+  .mobile-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .mobile-menu a {
+    padding: 14px 16px;
+    border-radius: 14px;
+    color: #1a1a1c;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .mobile-menu a:active { background: var(--lavender); }
+
+  /* ---------- Tiles ---------- */
+  .tile {
+    --e: 2px;
+    --o: 6px;
+
+    --s: calc(var(--u) * 26);
+    --m: calc(var(--u) * 38);
+    --l: calc(var(--u) * 59);
+    --n: calc(var(--u) * 97);
+
+    position: relative;
+    display: block;
+    min-height: calc(var(--u) * 252);
+    color: inherit;
+    text-decoration: none;
+    outline: none;
+    isolation: isolate;
+  }
+
+  .tile::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--lavender);
+    border-radius: calc(var(--u) * 32);
+  }
+  .tile--dark::before { background: #171717; }
+
+  /* White carve-out for the button; anchored to the bottom-right so the tile can grow in height */
+  .tile::after {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--e));
+    z-index: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+
+    background-image:
+      radial-gradient(circle at 0 0, transparent calc(var(--s) - 0.5px), #fff calc(var(--s) + 0.5px)),
+      radial-gradient(circle at 0 0, transparent calc(var(--m) - 0.5px), #fff calc(var(--m) + 0.5px)),
+      radial-gradient(circle at calc(100% - var(--o)) calc(100% - var(--o)),
+                      #fff calc(var(--l) - 0.5px), transparent calc(var(--l) + 0.5px)),
+      linear-gradient(#fff, #fff),
+      linear-gradient(#fff, #fff);
+
+    background-size:
+      calc(var(--s) + var(--o)) calc(var(--s) + var(--e)),
+      calc(var(--m) + var(--e)) calc(var(--m) + var(--o)),
+      calc(var(--l) + var(--o)) calc(var(--l) + var(--o)),
+      calc(var(--n) + var(--e)) calc(var(--u) * 39 + var(--e)),
+      calc(var(--m) + var(--e)) calc(var(--l) + var(--o));
+
+    background-position:
+      right calc(var(--n) + var(--e) - var(--o)) bottom 0,
+      right 0 bottom calc(var(--u) * 98 + var(--e) - var(--o)),
+      right calc(var(--m) + var(--e) - var(--o)) bottom calc(var(--u) * 39 + var(--e) - var(--o)),
+      right 0 bottom 0,
+      right 0 bottom calc(var(--u) * 39 + var(--e) - var(--o));
+  }
+
+  .tile-name, .news-text, .tile-btn { z-index: 1; }
+
+  .tile-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--u) * 96);
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 700;
+    font-size: calc(var(--u) * 56);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: var(--text);
+  }
+  .tile--dark .tile-name { color: #fff; }
+
+  .tile-name--small {
+    left: calc(var(--u) * 46);
+    right: auto;
+    top: auto;
+    bottom: calc(var(--u) * 52);
+    text-align: left;
+    font-size: calc(var(--u) * 34);
+    font-weight: 500;
+  }
+
+  .tile-btn {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: calc(var(--u) * 82);
+    height: calc(var(--u) * 82);
+    border-radius: 50%;
+    background: #171717;
+    transition: transform 0.25s ease;
+  }
+  .tile--dark .tile-btn {
+    background: #2b2b2b;
+    box-shadow: 0 0 0 4px #fff;
+  }
+
+  .tile-arrow {
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M17 7H8M17 7V16'/%3E%3C/svg%3E")
+                center / calc(var(--u) * 28) no-repeat;
+    transition: transform 0.25s ease;
+  }
+
+  @media (hover: hover) {
+    .tile:hover .tile-btn   { transform: scale(1.05); }
+    .tile:hover .tile-arrow { transform: translate(calc(var(--u) * 2), calc(var(--u) * -2)); }
+    .contact-btn:hover, .scroll-btn:hover, .menu-btn:hover { background: #2c2c2e; }
+  }
+  .tile:focus-visible .tile-btn { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--text); }
+
+  /* News tile text now flows in the document so tiles grow with their content */
+  .news-text {
+    position: relative;
+    min-height: calc(var(--u) * 252);
+    padding: calc(var(--u) * 42) calc(var(--u) * 230) calc(var(--u) * 40) calc(var(--u) * 46);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .news-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .news-tag {
+    padding: 4px 11px;
+    background: #fff;
+    color: #7f81a0;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .news-title {
+    margin: 14px 0;
+    font-size: clamp(15px, calc(var(--u) * 26), 19px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.32;
+    color: #17181c;
+  }
+  .news-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-size: 12.5px;
+    color: #9a9cb3;
+  }
+
+  /* ---------- Sections ---------- */
+  .section {
+    position: relative;
+    max-width: 1500px;
+    margin: clamp(64px, 6.4vw, 96px) auto 0;
+    padding: 0;
+  }
+
+  .watermark {
+    position: absolute;
+    left: 0;
+    top: -0.6em;
+    font-size: clamp(90px, 11.2vw, 168px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: #f1f1f6;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .section-title {
+    position: relative;
+    margin-bottom: 34px;
+    text-align: center;
+    font-size: clamp(28px, 3.4vw, 40px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .portfolio-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: clamp(70px, 8.5vw, 128px);
+  }
+  .portfolio-grid .tile:first-child { grid-column: 2; }
+
+  .news-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 40px;
+  }
+
+  /* ---------- Footer ---------- */
+  .footer {
+    --radius: 22px;
+    --panel-radius: 26px;
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: max(28%, 330px) minmax(0, 1fr);
+    grid-template-rows: 135px 176px;
+    grid-template-areas:
+      "email  ."
+      "legal  social";
+  }
+
+  .footer-email {
+    grid-area: email;
+    padding: 0 clamp(24px, 3vw, 46px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    background: var(--lavender);
+    border-radius: var(--panel-radius) var(--panel-radius) 0 var(--panel-radius);
+    color: #1a1a1c;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .footer-email:hover { background: #e4e6f8; }
+
+  .footer-label { font-size: 14px; color: #9fa2bb; }
+  .footer-mail {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: clamp(17px, 1.5vw, 22px);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .footer-mail .icon { width: 13px; height: 13px; margin-top: 2px; color: #55576b; }
+
+  .footer-social {
+    --fill: var(--lavender);
+    grid-area: social;
+    position: relative;
+    min-width: 0;
+    padding: 0 clamp(24px, 5vw, 104px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: center;
+    gap: 14px clamp(20px, 4.6vw, 78px);
+    background: var(--fill);
+    border-radius: 0 var(--panel-radius) var(--panel-radius) var(--panel-radius);
+  }
+  .footer-social a {
+    color: #1a1a1c;
+    text-decoration: none;
+    font-size: clamp(16px, 1.35vw, 20px);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .footer-social::before { --cut: 100% 0; left: 0; top: calc(-1 * var(--radius)); }
+  .footer-social::after  { --cut: 0 100%;  left: calc(-1 * var(--radius)); top: 0; }
+
+  .footer-legal {
+    grid-area: legal;
+    padding: 55px clamp(24px, 3vw, 46px) 0;
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+    color: #a3a6ba;
+  }
+  .footer-legal .row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px clamp(24px, 4vw, 77px); }
+  .footer-legal a { color: inherit; text-decoration: none; }
+  .footer-legal .small { font-size: 12.5px; }
+  .footer-legal .made  { font-size: 15px; }
+
+  .nav a, .footer-social a, .footer-legal a { transition: opacity 0.2s ease; }
+  @media (hover: hover) {
+    .nav a:hover, .footer-social a:hover { opacity: 0.5; }
+    .footer-legal a:hover { opacity: 0.6; }
+  }
+
+  /* ================= Responsive ================= */
+
+  /* Header switches to the hamburger menu */
+  @media (max-width: 1000px) {
+    .nav { display: none; }
+    .menu-btn { display: flex; }
+  }
+
+  @media (max-width: 860px) {
+    .portfolio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .portfolio-grid .tile:first-child { grid-column: auto; }
+
+    .news-grid { grid-template-columns: minmax(0, 1fr); }
+    .news-text { padding-right: calc(var(--u) * 46); }
+    .news-title, .news-meta { padding-right: calc(var(--u) * 140); }
+  }
+
+  @media (max-width: 820px) {
+    :root { --btn: 46px; }
+    .hero { --header-h: 64px; }
+    .notch-logo { width: auto; padding-right: 24px; }
+    .notch-scroll { width: auto; }
+    .contact-btn { width: auto; padding: 0 18px; gap: 14px; font-size: 15px; }
+    .headline span { white-space: normal; font-size: clamp(32px, 10.4vw, 64px); }
+
+    .footer {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto;
+      grid-template-areas: "email" "social" "legal";
+      gap: 12px;
+    }
+    .footer-email  { border-radius: var(--panel-radius); padding: 34px 28px; }
+    .footer-social { border-radius: var(--panel-radius); gap: 18px 36px; padding: 32px 28px; }
+    .footer-social::before, .footer-social::after { display: none; }
+    .footer-legal  { padding: 12px 28px 8px; gap: 18px; }
+    .footer-legal .row { gap: 10px 32px; }
+  }
+
+  @media (max-width: 560px) {
+    .contact-label { display: none; }
+    .contact-btn { width: var(--btn); padding: 0; justify-content: center; }
+    .brand { padding-left: 20px; gap: 10px; }
+    .brand svg { width: 28px; height: 28px; }
+    .brand-name { font-size: 12px; }
+    .section { margin-top: 56px; }
+    .section-title { margin-bottom: 24px; }
+    .news-grid { margin-top: 28px; }
+  }
+
+  @media (max-width: 520px) {
+    .portfolio-grid { grid-template-columns: minmax(0, 1fr); margin-top: 0; }
+    .watermark { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    :root { --pad-t: 10px; --pad-b: 10px; --pad-x: 10px; }
+    .hero { border-radius: 22px; }
+  }
+
+  @media (max-width: 380px) {
+    .brand { padding-left: 16px; gap: 9px; }
+    .brand svg { width: 26px; height: 26px; }
+    .brand-name { font-size: 11.5px; }
+    .notch-logo { padding-right: 18px; }
+  }
+
+  /* Short landscape screens */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .hero { min-height: 400px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-image"></div>
+
+    <div class="notch notch-logo">
+      <a class="brand" href="#">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="5" y="5" width="30" height="30" rx="9"
+                stroke="#111" stroke-width="5" stroke-linecap="round"
+                stroke-dasharray="72 40" transform="rotate(-90 20 20)"/>
+          <circle cx="20" cy="20" r="3" fill="#111"/>
+        </svg>
+        <span class="brand-name">Polymorphic<br>Capital</span>
+      </a>
+    </div>
+
+    <nav class="nav">
+      <a href="#">Thesis</a>
+      <a href="#">Portfolio</a>
+      <a href="#">Team</a>
+      <a href="#">Latest</a>
+      <a href="#">Blog</a>
+      <a href="#">Contacts</a>
+    </nav>
+
+    <div class="notch notch-contact">
+      <a class="contact-btn" href="#" aria-label="Contact us">
+        <span class="contact-label">Contact us</span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 17L17 7M17 7H8M17 7V16"/>
+        </svg>
+      </a>
+      <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 8h16M4 16h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="#">Thesis</a>
+      <a href="#">Portfolio</a>
+      <a href="#">Team</a>
+      <a href="#">Latest</a>
+      <a href="#">Blog</a>
+      <a href="#">Contacts</a>
+    </div>
+
+    <h1 class="headline">
+      <span>Morphing ahead</span>
+      <span>of paradigms</span>
+    </h1>
+
+    <div class="notch notch-scroll">
+      <button class="scroll-btn" type="button" aria-label="Scroll down">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 4v16M5 12l7 7 7-7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <section class="section">
+    <p class="watermark">Portfolio</p>
+    <div class="portfolio-grid">
+      <a class="tile" href="#" aria-label="kredete">
+        <span class="tile-name">kredete</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+      <a class="tile" href="#" aria-label="OWNERA">
+        <span class="tile-name">OWNERA</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+      <a class="tile" href="#" aria-label="rise">
+        <span class="tile-name">rise</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+      <a class="tile" href="#" aria-label="Safe">
+        <span class="tile-name">Safe</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+      <a class="tile" href="#" aria-label="SYGNUM">
+        <span class="tile-name">SYGNUM</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+      <a class="tile" href="#" aria-label="zerion">
+        <span class="tile-name">zerion</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+      <a class="tile tile--dark" href="#" aria-label="View all">
+        <span class="tile-name tile-name--small">View all</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Latest news</h2>
+    <div class="news-grid">
+      <a class="tile" href="#" aria-label="The Hidden Holes in Standard SAFEs">
+        <span class="news-text">
+          <span class="news-tags"><span class="news-tag">Blog post</span></span>
+          <span class="news-title">The Hidden Holes in Standard SAFEs: Three Real Cases and How to Fix Them</span>
+          <span class="news-meta"><span>8.4.25</span></span>
+        </span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+
+      <a class="tile" href="#" aria-label="TACEO Raises Seed">
+        <span class="news-text">
+          <span class="news-tags"><span class="news-tag">Announcement</span><span class="news-tag">Data &amp; AI</span></span>
+          <span class="news-title">TACEO Raises Seed to Build Network for Private Shared State</span>
+          <span class="news-meta"><span>8.1.25</span><span>TACEO</span></span>
+        </span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+
+      <a class="tile" href="#" aria-label="Due Launches Stablecoin API">
+        <span class="news-text">
+          <span class="news-tags"><span class="news-tag">Announcement</span><span class="news-tag">Payments</span></span>
+          <span class="news-title">Due Launches Stablecoin API, Extends Seed Round to $7.3M to Empower Businesses with Borderless Payments Solution</span>
+          <span class="news-meta"><span>7.30.25</span><span>Due</span></span>
+        </span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+
+      <a class="tile tile--dark" href="#" aria-label="View all">
+        <span class="tile-name tile-name--small">View all</span>
+        <span class="tile-btn"><span class="tile-arrow"></span></span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <a class="footer-email" href="mailto:info@polymorphic.capital">
+      <span class="footer-label">Email</span>
+      <span class="footer-mail">info@polymorphic.capital
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17L17 7M17 7H8M17 7V16"/>
+        </svg>
+      </span>
+    </a>
+
+    <div class="footer-legal">
+      <div class="row">
+        <a class="small" href="#">Privacy policy</a>
+        <a class="made" href="#">Made by Easy</a>
+      </div>
+      <span class="small">&copy;2024. Polymorphic Capital</span>
+    </div>
+
+    <nav class="footer-social">
+      <a href="#">Farcaster</a>
+      <a href="#">Lens</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">YouTube</a>
+      <a href="#">X</a>
+      <a href="#">Mirror</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var btn = document.querySelector('.menu-btn');
+    var menu = document.getElementById('mobile-menu');
+    var scrollBtn = document.querySelector('.scroll-btn');
+
+    function setOpen(open) {
+      menu.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setOpen(!menu.classList.contains('open'));
+    });
+    menu.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') setOpen(false);
+    });
+    document.addEventListener('click', function (e) {
+      if (!menu.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setOpen(false);
+    });
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 1000) setOpen(false);
+    });
+
+    scrollBtn.addEventListener('click', function () {
+      var next = document.querySelector('.section');
+      if (next) next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  })();
+</script>
+</body>
+</html>
