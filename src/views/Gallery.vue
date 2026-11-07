@@ -130,6 +130,15 @@ const projects = [
     image: sakuraBranch,
     linkLabel: 'View website →',
   },
+  {
+    id: 6,
+    real: true,
+    title: 'Portfolio',
+    category: 'Website',
+    url: 'https://portfolio.maikl.agency/',
+    image: sakuraBranch, // swap for a dedicated thumbnail, e.g. portfolioThumb
+    linkLabel: 'View website →',
+  },
 ]
 
 // A "static" link is a plain file served as-is (an .html file in public/,
@@ -160,7 +169,7 @@ function linkComponent(item) {
 const fanOpen = ref(false)
 const hovered = ref(null)
 
-const CENTER = (projects.length - 1) / 2 // 2, for 5 cards
+const CENTER = (projects.length - 1) / 2 // 2.5, for 6 cards
 
 function cardStyle(i) {
   const offset = i - CENTER
@@ -443,11 +452,6 @@ onBeforeUnmount(() => {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-  }
-
-  /* hide the very last card on mobile */
-  .fan-wrap > :nth-last-child(1) {
-    display: none;
   }
 
   .proj-card {
