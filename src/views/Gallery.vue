@@ -75,6 +75,7 @@ import lashesThumb from '@/assets/lashes-thumb.png'
 import zeroHourThumb from '@/assets/0hour-thumb.png'
 import galaxyThumb from '@/assets/galaxy-thumb.png'
 import sakuraBranch from '@/assets/sakura-branch.png'
+import dropThumb from '@/assets/dropThumb.png'
 
 // Only real, shipped projects get `real: true` + full details. Everything
 // else renders as an open "want to be next?" slot — swap these in as you
@@ -136,7 +137,7 @@ const projects = [
     title: 'Portfolio',
     category: 'Website',
     url: 'https://portfolio.maikl.agency/',
-    image: sakuraBranch, // swap for a dedicated thumbnail, e.g. portfolioThumb
+    image: dropThumb, // swap for a dedicated thumbnail, e.g. portfolioThumb
     linkLabel: 'View website →',
   },
 ]
