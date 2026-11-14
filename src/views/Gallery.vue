@@ -13,18 +13,22 @@
     >
       <component
         :is="linkComponent(item)"
-        v-for="(item, i) in projects"
+        v-for="(item, i) in displayProjects"
         :key="item.id"
         class="proj-card"
-        :class="{ 'proj-card--open': !item.real }"
+        :class="{
+          'proj-card--open': !item.real,
+          'proj-card--static': !isLinked(item),
+        }"
         :style="!isMobile ? cardStyle(i) : undefined"
-        :href="item.real && isStaticLink(item) ? item.url : undefined"
-        :to="item.real && !isStaticLink(item) ? item.url : (!item.real ? '/hire' : undefined)"
-        :target="item.real && isStaticLink(item) ? '_blank' : undefined"
-        :rel="item.real && isStaticLink(item) ? 'noopener' : undefined"
-        tabindex="0"
-        role="button"
-        :aria-label="item.real ? `${item.title} — ${item.category}` : 'Open project slot — get in touch'"
+        v-bind="linkAttrs(item)"
+        :tabindex="isLinked(item) ? 0 : undefined"
+        :role="isLinked(item) ? 'button' : undefined"
+        :aria-label="!isLinked(item)
+          ? undefined
+          : item.real
+            ? `${item.title} — ${item.category}`
+            : 'Open project slot — get in touch'"
         @mouseenter="hovered = i"
         @focus="fanOpen = true; hovered = i"
         @blur="if (hovered === i) { fanOpen = false; hovered = null }"
@@ -32,7 +36,7 @@
         <div class="proj-thumb">
           <template v-if="item.real">
             <img class="proj-photo" :src="item.image" :alt="`${item.title} preview`" />
-            <span v-if="isStaticLink(item)" class="proj-external" aria-hidden="true">↗</span>
+            <span v-if="isStaticLink(item) && isLinked(item)" class="proj-external" aria-hidden="true">↗</span>
           </template>
 
           <template v-else>
@@ -68,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 import massageAcademyThumb from '@/assets/massage-academy-thumb.png'
 import lashesThumb from '@/assets/lashes-thumb.png'
@@ -87,7 +91,37 @@ import dropThumb from '@/assets/dropThumb.png'
 //     <a href> that opens in a new tab, see isStaticLink() below.
 //   - an internal Vue route path (e.g. '/galaxy') — these render via
 //     RouterLink and navigate within the app.
+// Array order = priority order (the first FEATURED_COUNT are your best work).
+// On mobile that order is used as-is (featured first in the grid). On desktop,
+// displayProjects below moves the featured cards to the middle of the fan,
+// since the middle cards sit in front and are the easiest to hit.
 const projects = [
+  {
+    id: 6,
+    real: true,
+    title: 'Portfolio',
+    category: 'Website',
+    url: 'https://portfolio.maikl.agency/',
+    image: dropThumb, // swap for a dedicated thumbnail, e.g. portfolioThumb
+    linkLabel: 'View website →',
+  },
+  {
+    id: 5,
+    real: true,
+    title: 'Maikl',
+    category: 'Website',
+    url: '/fancy.html',
+    image: sakuraBranch,
+    linkLabel: 'View website →',
+  },
+  {
+    id: 2,
+    real: true,
+    title: 'Dayline',
+    category: 'Web App',
+    url: 'https://dayline.0hour.app/',
+    image: zeroHourThumb,
+  },
   {
     id: 1,
     real: true,
@@ -96,14 +130,7 @@ const projects = [
     url: '/lashes.html',
     image: lashesThumb,
     linkLabel: 'View animation →',
-  },
-  {
-    id: 2,
-    real: true,
-    title: '0hour',
-    category: 'Web App',
-    url: 'https://0hour.app/',
-    image: zeroHourThumb,
+    noMobileLink: true, // card is shown on mobile but not clickable
   },
   {
     id: 3,
@@ -122,24 +149,6 @@ const projects = [
     image: galaxyThumb,
     linkLabel: 'View animation →',
   },
-  {
-    id: 5,
-    real: true,
-    title: 'Maikl',
-    category: 'Website',
-    url: '/fancy.html',
-    image: sakuraBranch,
-    linkLabel: 'View website →',
-  },
-  {
-    id: 6,
-    real: true,
-    title: 'Portfolio',
-    category: 'Website',
-    url: 'https://portfolio.maikl.agency/',
-    image: dropThumb, // swap for a dedicated thumbnail, e.g. portfolioThumb
-    linkLabel: 'View website →',
-  },
 ]
 
 // A "static" link is a plain file served as-is (an .html file in public/,
@@ -152,14 +161,25 @@ function isStaticLink(item) {
   return /^https?:\/\//.test(url) || url.endsWith('.html')
 }
 
-// Which component to render the card as: real items with a static link
-// use a plain <a>; real items with a route path use RouterLink; open
-// slots use RouterLink to /hire.
+// Is this card clickable right now? (Lashes isn't on mobile.)
+function isLinked(item) {
+  if (!item.real) return true // open slots go to /hire
+  return !(isMobile.value && item.noMobileLink)
+}
+
+// Which component to render the card as: a plain <div> when unlinked,
+// <a> for static links, RouterLink for internal routes and open slots.
 function linkComponent(item) {
-  if (item.real) {
-    return isStaticLink(item) ? 'a' : 'RouterLink'
-  }
+  if (!isLinked(item)) return 'div'
+  if (item.real && isStaticLink(item)) return 'a'
   return 'RouterLink'
+}
+
+function linkAttrs(item) {
+  if (!item.real) return { to: '/hire' }
+  if (!isLinked(item)) return {}
+  if (isStaticLink(item)) return { href: item.url, target: '_blank', rel: 'noopener' }
+  return { to: item.url }
 }
 
 // ── Fan-out deck (desktop hover) ─────────────────────────────────
@@ -197,6 +217,16 @@ function cardStyle(i) {
 
 // ── Mobile: plain grid, no expand logic ───────────────────────────
 const isMobile = ref(false)
+
+const FEATURED_COUNT = 2
+
+const displayProjects = computed(() => {
+  if (isMobile.value) return projects
+  const featured = projects.slice(0, FEATURED_COUNT)
+  const rest = projects.slice(FEATURED_COUNT)
+  const mid = Math.floor(rest.length / 2)
+  return [...rest.slice(0, mid), ...featured, ...rest.slice(mid)]
+})
 
 let mql
 function handleMqlChange(e) {
@@ -289,6 +319,8 @@ onBeforeUnmount(() => {
   transform-origin: bottom center;
   filter: brightness(0.96);
 }
+.proj-card--static { cursor: default; }
+.proj-card--static:active { filter: none; }
 
 .proj-thumb {
   position: relative;
