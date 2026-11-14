@@ -16,19 +16,12 @@
         v-for="(item, i) in displayProjects"
         :key="item.id"
         class="proj-card"
-        :class="{
-          'proj-card--open': !item.real,
-          'proj-card--static': !isLinked(item),
-        }"
+        :class="{ 'proj-card--open': !item.real }"
         :style="!isMobile ? cardStyle(i) : undefined"
         v-bind="linkAttrs(item)"
-        :tabindex="isLinked(item) ? 0 : undefined"
-        :role="isLinked(item) ? 'button' : undefined"
-        :aria-label="!isLinked(item)
-          ? undefined
-          : item.real
-            ? `${item.title} — ${item.category}`
-            : 'Open project slot — get in touch'"
+        tabindex="0"
+        role="button"
+        :aria-label="item.real ? `${item.title} — ${item.category}` : 'Open project slot — get in touch'"
         @mouseenter="hovered = i"
         @focus="fanOpen = true; hovered = i"
         @blur="if (hovered === i) { fanOpen = false; hovered = null }"
@@ -36,7 +29,7 @@
         <div class="proj-thumb">
           <template v-if="item.real">
             <img class="proj-photo" :src="item.image" :alt="`${item.title} preview`" />
-            <span v-if="isStaticLink(item) && isLinked(item)" class="proj-external" aria-hidden="true">↗</span>
+            <span v-if="isStaticLink(item)" class="proj-external" aria-hidden="true">↗</span>
           </template>
 
           <template v-else>
@@ -92,7 +85,8 @@ import dropThumb from '@/assets/dropThumb.png'
 //   - an internal Vue route path (e.g. '/galaxy') — these render via
 //     RouterLink and navigate within the app.
 // Array order = priority order (the first FEATURED_COUNT are your best work).
-// On mobile that order is used as-is (featured first in the grid). On desktop,
+// On mobile that order is used as-is (featured first in the grid), minus
+// anything flagged hideOnMobile. On desktop,
 // displayProjects below moves the featured cards to the middle of the fan,
 // since the middle cards sit in front and are the easiest to hit.
 const projects = [
@@ -117,7 +111,7 @@ const projects = [
   {
     id: 2,
     real: true,
-    title: 'Dayline',
+    title: '0hour',
     category: 'Web App',
     url: 'https://dayline.0hour.app/',
     image: zeroHourThumb,
@@ -130,7 +124,7 @@ const projects = [
     url: '/lashes.html',
     image: lashesThumb,
     linkLabel: 'View animation →',
-    noMobileLink: true, // card is shown on mobile but not clickable
+    hideOnMobile: true, // not rendered at all on mobile
   },
   {
     id: 3,
@@ -161,23 +155,15 @@ function isStaticLink(item) {
   return /^https?:\/\//.test(url) || url.endsWith('.html')
 }
 
-// Is this card clickable right now? (Lashes isn't on mobile.)
-function isLinked(item) {
-  if (!item.real) return true // open slots go to /hire
-  return !(isMobile.value && item.noMobileLink)
-}
-
-// Which component to render the card as: a plain <div> when unlinked,
-// <a> for static links, RouterLink for internal routes and open slots.
+// Which component to render the card as: <a> for static links,
+// RouterLink for internal routes and open slots.
 function linkComponent(item) {
-  if (!isLinked(item)) return 'div'
   if (item.real && isStaticLink(item)) return 'a'
   return 'RouterLink'
 }
 
 function linkAttrs(item) {
   if (!item.real) return { to: '/hire' }
-  if (!isLinked(item)) return {}
   if (isStaticLink(item)) return { href: item.url, target: '_blank', rel: 'noopener' }
   return { to: item.url }
 }
@@ -221,7 +207,7 @@ const isMobile = ref(false)
 const FEATURED_COUNT = 2
 
 const displayProjects = computed(() => {
-  if (isMobile.value) return projects
+  if (isMobile.value) return projects.filter((p) => !p.hideOnMobile)
   const featured = projects.slice(0, FEATURED_COUNT)
   const rest = projects.slice(FEATURED_COUNT)
   const mid = Math.floor(rest.length / 2)
@@ -319,8 +305,6 @@ onBeforeUnmount(() => {
   transform-origin: bottom center;
   filter: brightness(0.96);
 }
-.proj-card--static { cursor: default; }
-.proj-card--static:active { filter: none; }
 
 .proj-thumb {
   position: relative;
